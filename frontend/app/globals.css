@@ -1,0 +1,44 @@
+/* Define Proxima Nova using local files */
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('/fonts/proximanova_regular.ttf') format('truetype');
+  font-weight: 400; /* normal */
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Proxima Nova';
+  src: url('/fonts/proximanova_bold.otf') format('opentype');
+  font-weight: 700; /* bold */
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Your working baseline styles */
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  /* The font will be applied via Tailwind */
+}

@@ -1,2 +1,22 @@
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+env/
+
+# Data Files - Crucial: do not commit large data files
 data/
+*.duckdb
+*.duckdb.wal
+
+# Environment & Secrets - Crucial: do not commit secrets
 .env
+.env.*
+*.env
+
+# IDE & OS specific
+.vscode/
+.idea/
+.DS_Store
