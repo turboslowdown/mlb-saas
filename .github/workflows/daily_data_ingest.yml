@@ -1,0 +1,58 @@
+name: Daily Data Ingestion
+
+# Controls when the workflow will run
+on:
+  # Run this workflow manually from the Actions tab
+  workflow_dispatch:
+  
+  # Runs the job on a schedule (e.g., every day at 5:00 AM UTC)
+  # Uses cron syntax: Minute Hour Day Month Day-of-week
+  schedule:
+    - cron: '0 5 * * *'
+
+# Defines the actual jobs that will run
+jobs:
+  ingest-data:
+    # runner type for job
+    runs-on: ubuntu-latest
+
+    # A sequence of tasks that will be executed
+    steps:
+      # Checks out repository's code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Set up Python
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      #  Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      # Run Statcast Ingestion
+      # Injects GitHub secrets as environment variables for the script to use
+      - name: Run Statcast Ingestion
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: python -m etl.ingest_statcast
+
+      # Run Player Map Ingestion
+      - name: Run Player Map Ingestion
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: python -m etl.ingest_player_map
+        
+      # Note: NOT running the 'ingest_lahman_manual.py' because
+      # it depends on a local file. The Lahman and Player Map data is updated 
+      # very infrequently, so running only Statcast daily is the correct approach.
