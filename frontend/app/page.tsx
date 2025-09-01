@@ -9,8 +9,7 @@ interface QueryResult {
   results: Record<string, string | number | boolean | null>[];
 }
 
-const getVisualizationType = (results: Record<string, any>[] | undefined): 'barchart' | 'table' => {
-    if (!results || results.length === 0) {
+const getVisualizationType = (results: Record<string, string | number | boolean | null>[] | undefined): 'barchart' | 'table' => {    if (!results || results.length === 0) {
       return 'table';
     }
     const firstRow = results[0];

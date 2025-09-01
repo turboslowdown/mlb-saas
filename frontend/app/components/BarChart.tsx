@@ -4,9 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import debounce from 'lodash.debounce';
 
+
 // MODIFICATION: Typed the props to avoid 'any'
 interface ChartProps {
-  results: Record<string, string | number>[];
+  results: Record<string, string | number | boolean | null>[];
 }
 
 const SimpleBarChart = ({ results }: ChartProps) => {
