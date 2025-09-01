@@ -14,7 +14,9 @@ app = FastAPI(
 )
 
 origins = [
-    "http://localhost:3000",
+    "http://localhost:3000", # Keep this for local development
+    "https://fullcount-ai.vercel.app/", 
+    "https://mlb-saas.vercel.app/"
 ]
 
 app.add_middleware(
