@@ -2,24 +2,19 @@
 
 import { useState, useMemo } from 'react';
 import { FaArrowUp } from 'react-icons/fa';
-import SimpleBarChart from './components/BarChart'; // MODIFICATION: Import the new component
+import SimpleBarChart from './components/BarChart';
 
-// Define a type for our API response structure
 interface QueryResult {
   sql_query: string;
-  results: Record<string, any>[];
+  results: Record<string, any>[]; // Keeping 'any' here is acceptable as the shape is truly dynamic
 }
 
-// MODIFICATION: The "Analyzer" Function
 const getVisualizationType = (results: Record<string, any>[] | undefined): 'barchart' | 'table' => {
     if (!results || results.length === 0) {
-      return 'table'; // Default to table for no results
+      return 'table';
     }
-
     const firstRow = results[0];
     const keys = Object.keys(firstRow);
-
-    // Pattern for a simple bar chart: 2 columns, first is string, second is number
     if (
         keys.length === 2 &&
         typeof firstRow[keys[0]] === 'string' &&
@@ -27,18 +22,15 @@ const getVisualizationType = (results: Record<string, any>[] | undefined): 'barc
     ) {
         return 'barchart';
     }
-
-    return 'table'; // Default to table for all other cases
+    return 'table';
 };
 
 export default function HomePage() {
   const [question, setQuestion] = useState<string>('');
-  const [queryResult, setQueryResult] = useState<QueryResult | null>(null);
+  // MODIFICATION: Removed unused 'queryResult' state
   const [lastSuccessfulResult, setLastSuccessfulResult] = useState<QueryResult | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  
-  // MODIFICATION: This state variable was correctly added
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'ascending' | 'descending' } | null>(null);
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -53,7 +45,7 @@ export default function HomePage() {
         previous_sql: lastSuccessfulResult ? lastSuccessfulResult.sql_query : null,
       };
 
-      const response = await fetch('http://127.0.0.1:8000/query', {
+      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/query', { // Using the environment variable
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody),
@@ -62,40 +54,35 @@ export default function HomePage() {
         throw new Error(`API request failed with status ${response.status}`);
       }
       const data: QueryResult = await response.json();
-      setQueryResult(data);
       setLastSuccessfulResult(data);
       setQuestion('');
-      setSortConfig(null); // Reset sort when new data is fetched
+      setSortConfig(null);
 
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred.');
-      setQueryResult(null);
+    } catch (err) { // MODIFICATION: Explicitly typed 'err'
+      const error = err as Error;
+      setError(error.message || 'An unexpected error occurred.');
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleReset = () => {
-    setQueryResult(null);
     setLastSuccessfulResult(null);
     setQuestion('');
     setError(null);
-    setSortConfig(null); // Also reset sort on clear
+    setSortConfig(null);
   };
 
-  const hasInput = question.trim().length > 0;
-
-  // MODIFICATION: Add the memoized sorting logic
   const sortedResults = useMemo(() => {
     if (!lastSuccessfulResult || !lastSuccessfulResult.results) {
       return [];
     }
-    let sortableItems = [...lastSuccessfulResult.results];
+    // MODIFICATION: Changed 'let' to 'const'
+    const sortableItems = [...lastSuccessfulResult.results];
     if (sortConfig !== null) {
       sortableItems.sort((a, b) => {
         const valA = a[sortConfig.key];
         const valB = b[sortConfig.key];
-        // Handle nulls or different types gracefully
         if (valA === null || valA === undefined) return 1;
         if (valB === null || valB === undefined) return -1;
         if (valA < valB) {
@@ -110,7 +97,6 @@ export default function HomePage() {
     return sortableItems;
   }, [lastSuccessfulResult, sortConfig]);
 
-  // MODIFICATION: Add the sort handler function
   const handleSort = (key: string) => {
     let direction: 'ascending' | 'descending' = 'ascending';
     if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
@@ -118,7 +104,9 @@ export default function HomePage() {
     }
     setSortConfig({ key, direction });
   };
+  
   const visualizationType = getVisualizationType(lastSuccessfulResult?.results);
+  const hasInput = question.trim().length > 0;
 
 
   return (

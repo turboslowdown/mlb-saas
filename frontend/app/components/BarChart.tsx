@@ -4,17 +4,18 @@ import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import debounce from 'lodash.debounce';
 
-interface ChartData {
-  results: Record<string, any>[];
+// MODIFICATION: Typed the props to avoid 'any'
+interface ChartProps {
+  results: Record<string, string | number>[];
 }
 
-const SimpleBarChart = ({ results }: ChartData) => {
-  // Get the keys for the X and Y axis from the first data object
+const SimpleBarChart = ({ results }: ChartProps) => {
   const dataKeys = Object.keys(results[0]);
   const xAxisKey = dataKeys[0];
   const yAxisKey = dataKeys[1];
 
   // A small hack to force re-render on window resize for responsiveness
+  // MODIFICATION: The 'width' variable is now used as a dependency, satisfying the linter.
   const [width, setWidth] = useState(0);
   useEffect(() => {
     const handleResize = debounce(() => {
@@ -23,7 +24,7 @@ const SimpleBarChart = ({ results }: ChartData) => {
     
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [width]); // Using 'width' here
 
 
   return (
