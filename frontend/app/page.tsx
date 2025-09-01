@@ -6,7 +6,7 @@ import SimpleBarChart from './components/BarChart';
 
 interface QueryResult {
   sql_query: string;
-  results: Record<string, any>[]; // Keeping 'any' here is acceptable as the shape is truly dynamic
+  results: Record<string, string | number | boolean | null>[];
 }
 
 const getVisualizationType = (results: Record<string, any>[] | undefined): 'barchart' | 'table' => {
